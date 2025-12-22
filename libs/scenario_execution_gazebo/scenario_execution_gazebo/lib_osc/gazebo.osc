@@ -33,6 +33,11 @@ action set_entity_pose:
     pose: pose_3d                       # desired pose
     world_name: string = 'default'      # simulation world name
 
+action osc_actor.set_actor_pose:
+    # Set the pose of an actor based on its name
+    pose: pose_3d                       # desired pose
+    world_name: string = 'default'      # simulation world name
+
 struct spawn_entity:
     entity_name: string                 # name of entity in simulation
     spawn_pose: pose_3d                 # position at which the object gets spawned
