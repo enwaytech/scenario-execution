@@ -32,7 +32,7 @@ class SetEntityPoseActionState(Enum):
     FAILURE = 4
 
 
-class SetEntityPose(RunProcess):
+class GazeboSetEntityPose(RunProcess):
     """Class to set the pose of an entity in gazebo."""
 
     def __init__(self) -> None:
@@ -97,7 +97,8 @@ class SetEntityPose(RunProcess):
                         line = self.output.popleft()
                         line = line.lower()
                         if "error" in line or "timed out" in line:
-                            self.feedback_message = f"Found error output while executing '{self.get_command()}'"  # pylint: disable= attribute-defined-outside-init
+                            # pylint: disable-next= attribute-defined-outside-init
+                            self.feedback_message = f"Found error output while executing '{self.get_command()}'"
                             self.current_state = SetEntityPoseActionState.FAILURE
                             return py_trees.common.Status.FAILURE
                     except IndexError:
