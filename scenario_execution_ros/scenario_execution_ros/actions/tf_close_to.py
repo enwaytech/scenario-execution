@@ -104,8 +104,8 @@ class TfCloseTo(BaseAction):
         marker = Marker()
         marker.header.frame_id = 'map'
         marker.type = Marker.CYLINDER
-        marker.scale.x = self.threshold
-        marker.scale.y = self.threshold
+        marker.scale.x = self.threshold * 2.0
+        marker.scale.y = self.threshold * 2.0
         marker.scale.z = 0.01
         marker.color.a = 1.0
         marker.color.r = 0.5
