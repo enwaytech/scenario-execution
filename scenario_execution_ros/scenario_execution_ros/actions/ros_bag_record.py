@@ -14,15 +14,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 from datetime import datetime
 from enum import Enum
+import os
+import shutil
+import signal
+from typing import Union
 
 import py_trees
 from scenario_execution.actions.base_action import ActionError
 from scenario_execution.actions.run_process import RunProcess
-import shutil
-import signal
 
 
 class RosBagRecordActionState(Enum):
@@ -60,7 +61,7 @@ class RosBagRecord(RunProcess):
                 raise ActionError(f"Specified destination dir '{kwargs['output_dir']}' does not exist", action=self)
             self.output_dir = kwargs['output_dir']
 
-    def execute(self, topics: list, timestamp_suffix: bool, hidden_topics: bool, storage: str, use_sim_time: bool):  # pylint: disable=arguments-differ
+    def execute(self, topics: Union[list, str], timestamp_suffix: bool, hidden_topics: bool, storage: str, use_sim_time: bool):  # pylint: disable=arguments-differ
         self.bag_dir = ''
         if self.output_dir:
             self.bag_dir = self.output_dir + '/'
@@ -73,11 +74,6 @@ class RosBagRecord(RunProcess):
                 self.logger.info(f"Bag directory {self.bag_dir} already exists. Removing it.")
                 shutil.rmtree(self.bag_dir)
 
-        self.topics = topics
-        if topics:
-            self.missing_topics = topics.copy()
-        else:
-            self.missing_topics = None
         self.command = ["ros2", "bag", "record"]
         if hidden_topics:
             self.command.append("--include-hidden-topics")
@@ -85,7 +81,15 @@ class RosBagRecord(RunProcess):
             self.command.extend(["--storage", storage])
         if use_sim_time:
             self.command.append("--use-sim-time")
-        self.command.extend(["-o", self.bag_dir] + self.topics)
+        self.command.extend(["-o", self.bag_dir])
+
+        self.topics = topics
+        if self.topics:
+            self.command.extend(self.topics)
+            self.missing_topics = topics.copy()
+        else:
+            self.command.append("--all")  # record all topics & services
+            self.missing_topics = None
 
     def get_logger_stderr(self):
         """
