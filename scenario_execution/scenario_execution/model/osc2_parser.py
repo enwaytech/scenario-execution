@@ -358,7 +358,8 @@ class OpenScenario2Parser(object):
         if isinstance(param, BoolLiteral):
             if not isinstance(override_value, (bool)):
                 raise ValueError(f"bool expected, found {type(override_value).__name__}")
-            return override_value
+            # BoolLiteral stores values as strings "true" or "false"
+            return "true" if override_value else "false"
         elif isinstance(param, FloatLiteral):
             if not isinstance(override_value, (int, float)):
                 raise ValueError(f"float or int expected, found {type(override_value).__name__}")
