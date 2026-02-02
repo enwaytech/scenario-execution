@@ -179,7 +179,8 @@ class OpenScenario2Parser(object):
                 if param_keys:
                     raise ValueError(f"Scenario Parameter Overrides contain unknown parameter(s): {', '.join(param_keys)}")
         if keys:
-            raise ValueError(f"Scenario Parameter Overrides contain unknown scenario(s): {', '.join(keys)}")
+            # It's valid to have a shared override file for multiple scenarios
+            self.logger.debug(f"Scenario Parameter Overrides contain scenarios not in model (ignored): {', '.join(keys)}")
 
     def create_override_value_physical_literal(self, type_def, override_value):
         if not isinstance(override_value, (int, float)):
