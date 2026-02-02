@@ -48,6 +48,7 @@ class ROSScenarioExecution(ScenarioExecution):
         self.dry_run = args.dry_run
         self.render_dot = args.dot
         self.scenario_parameter_file = args.scenario_parameter_file
+        self.scenario_parameters = args.scenario_parameter
         self.create_scenario_parameter_file_template = args.create_scenario_parameter_file_template
         self.post_run = args.post_run
         self.snapshot_period = args.snapshot_period
@@ -61,6 +62,7 @@ class ROSScenarioExecution(ScenarioExecution):
         self.node.declare_parameter('dry_run', False)
         self.node.declare_parameter('dot', False)
         self.node.declare_parameter('scenario_parameter_file', "")
+        self.node.declare_parameter('scenario_parameters', [])
         self.node.declare_parameter('create_scenario_parameter_file_template', False)
         self.node.declare_parameter('post_run', "")
         self.node.declare_parameter('snapshot_period', 1.0)
@@ -81,6 +83,8 @@ class ROSScenarioExecution(ScenarioExecution):
             self.render_dot = self.node.get_parameter('dot').value
         if self.node.get_parameter('scenario_parameter_file').value:
             self.scenario_parameter_file = self.node.get_parameter('scenario_parameter_file').value
+        if self.node.get_parameter('scenario_parameters').value:
+            self.scenario_parameters = self.node.get_parameter('scenario_parameters').value
         if self.node.get_parameter('create_scenario_parameter_file_template').value:
             self.create_scenario_parameter_file_template = self.node.get_parameter('create_scenario_parameter_file_template').value
         if self.node.get_parameter('post_run').value:
@@ -96,6 +100,7 @@ class ROSScenarioExecution(ScenarioExecution):
                          dry_run=self.dry_run,
                          render_dot=self.render_dot,
                          scenario_parameter_file=self.scenario_parameter_file,
+                         scenario_parameters_list=self.scenario_parameters,
                          create_scenario_parameter_file_template=self.create_scenario_parameter_file_template,
                          post_run=self.post_run,
                          logger=self.logger)

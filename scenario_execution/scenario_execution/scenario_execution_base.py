@@ -28,6 +28,7 @@ from scenario_execution.model.model_file_loader import ModelFileLoader
 from dataclasses import dataclass
 from xml.sax.saxutils import escape  # nosec B406 # escape is only used on an internally generated error string
 from timeit import default_timer as timer
+from typing import List, Optional
 import subprocess  # nosec B404
 
 class ScenarioExecutionConfig:
@@ -104,6 +105,7 @@ class ScenarioExecution(object):
                  setup_timeout=py_trees.common.Duration.INFINITE,
                  tick_period: float = 0.1,
                  scenario_parameter_file=None,
+                 scenario_parameters_list: Optional[List[str]] = None,
                  create_scenario_parameter_file_template=None,
                  post_run=None,
                  logger=None,
@@ -162,6 +164,34 @@ class ScenarioExecution(object):
         self.results = []
         self.create_scenario_parameter_file_template = create_scenario_parameter_file_template
         self.scenario_parameter_file = scenario_parameter_file
+
+        # Parse scenario parameters list into dictionary
+        scenario_parameters = None
+        if scenario_parameters_list:
+            scenario_parameters = {}
+            for param in scenario_parameters_list:
+                if '=' not in param:
+                    raise ValueError(f"Invalid parameter format '{param}'. Expected format: scenario.param=value")
+                key, value = param.split('=', 1)
+                if '.' not in key:
+                    raise ValueError(f"Invalid parameter key '{key}'. Expected format: scenario.param")
+                scenario_name, param_name = key.split('.', 1)
+
+                if scenario_name not in scenario_parameters:
+                    scenario_parameters[scenario_name] = {}
+                # Try to parse value as int, float, bool, or keep as string
+                try:
+                    if value.lower() in ('true', 'false'):
+                        value = value.lower() == 'true'
+                    elif '.' in value:
+                        value = float(value)
+                    else:
+                        value = int(value)
+                except ValueError:
+                    pass  # Keep as string
+                scenario_parameters[scenario_name][param_name] = value
+
+        self.scenario_parameters = scenario_parameters
 
     def setup(self, scenario: py_trees.behaviour.Behaviour, **kwargs) -> bool:
         """
@@ -259,7 +289,7 @@ class ScenarioExecution(object):
                                            start_time=start))
             return False
         try:
-            self.tree = parser.process_file(self.scenario_file, self.log_model, self.debug, self.scenario_parameter_file, self.create_scenario_parameter_file_template)
+            self.tree = parser.process_file(self.scenario_file, self.log_model, self.debug, self.scenario_parameter_file, self.scenario_parameters, self.create_scenario_parameter_file_template)
             if self.create_scenario_parameter_file_template:
                 return True
         except Exception as e:  # pylint: disable=broad-except
@@ -420,6 +450,8 @@ class ScenarioExecution(object):
         parser.add_argument('-s', '--step-duration', type=float, help='Duration between the behavior tree step executions', default=0.1)
         parser.add_argument('--scenario-parameter-file', type=str,
                             help='File specifying scenario parameter. These will override default values.')
+        parser.add_argument('-p', '--scenario-parameter', action='append', metavar='KEY=VALUE',
+                            help='Override scenario parameters directly (format: scenario.param=value). Can be specified multiple times. These override file-based parameters.')
         parser.add_argument('--create-scenario-parameter-file-template',action='store_true', help='Command to run to create a scenario parameter file template specified by --scenario-parameter-file')
         parser.add_argument('--post-run', type=str, help='Command to run after scenario execution (expected commandline: <command> <output_dir>)')
         parser.add_argument('scenario', type=str, help='scenario file to execute', nargs='?')
@@ -441,6 +473,7 @@ def main():
                                                render_dot=args.dot,
                                                tick_period=args.step_duration,
                                                scenario_parameter_file=args.scenario_parameter_file,
+                                               scenario_parameters_list=args.scenario_parameter,
                                                create_scenario_parameter_file_template=args.create_scenario_parameter_file_template,
                                                post_run=args.post_run)
     except ValueError as e:

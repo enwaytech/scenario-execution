@@ -40,13 +40,13 @@ class OpenScenario2Parser(object):
         self.logger = logger
         self.parsed_files = []
 
-    def process_file(self, file, log_model: bool = False, debug: bool = False, scenario_parameter_file: str = None, create_scenario_parameter_file_template: bool = False):
+    def process_file(self, file, log_model: bool = False, debug: bool = False, scenario_parameter_file: str = None, scenario_parameters: dict = None, create_scenario_parameter_file_template: bool = False):
         """ Convenience method to execute the parsing and print out tree """
 
         parsed_model = self.parse_file(file, log_model)
 
         tree = py_trees.composites.Sequence(name="", memory=True)
-        model = self.create_internal_model(parsed_model, tree, file, log_model, debug, scenario_parameter_file, create_scenario_parameter_file_template)
+        model = self.create_internal_model(parsed_model, tree, file, log_model, debug, scenario_parameter_file, scenario_parameters, create_scenario_parameter_file_template)
 
         if len(model.find_children_of_type(ScenarioDeclaration)) == 0:
             raise ValueError("No scenario defined.")
@@ -73,11 +73,14 @@ class OpenScenario2Parser(object):
             print_tree(model, self.logger)
         return model
 
-    def create_internal_model(self, parsed_model, tree, file_name: str, log_model: bool = False, debug: bool = False, scenario_parameter_file: str = None, create_scenario_parameter_file_template: bool = False):
+    def create_internal_model(self, parsed_model, tree, file_name: str, log_model: bool = False, debug: bool = False, scenario_parameter_file: str = None, scenario_parameters: dict = None, create_scenario_parameter_file_template: bool = False):
         model = self.load_internal_model(parsed_model, file_name, log_model, debug)
         resolve_internal_model(model, tree, self.logger, log_model)
 
         # override parameter with externally defined ones
+        scenario_parameter_overrides = {}
+
+        # Load from file first
         if scenario_parameter_file:
             if not create_scenario_parameter_file_template:
                 with open(scenario_parameter_file) as stream:
@@ -85,10 +88,21 @@ class OpenScenario2Parser(object):
                         scenario_parameter_overrides = yaml.safe_load(stream)
                     except yaml.YAMLError as e:
                         raise ValueError(f"Unable to parse scenario-parameter-file file '{scenario_parameter_file}': {e}") from e
-                if scenario_parameter_overrides:
-                    self.apply_parameter_overrides(model, scenario_parameter_overrides)
             else:
                 self.create_parameter_file_template(model, scenario_parameter_file)
+                return model
+
+        # override file parameters by command-line parameters
+        if scenario_parameters:
+            for scenario_name, params in scenario_parameters.items():
+                if scenario_name not in scenario_parameter_overrides:
+                    scenario_parameter_overrides[scenario_name] = {}
+                scenario_parameter_overrides[scenario_name].update(params)
+
+        # Apply all overrides
+        if scenario_parameter_overrides:
+            self.apply_parameter_overrides(model, scenario_parameter_overrides)
+
         return model
 
     def create_parameter_file_template(self, model, scenario_parameter_file: str):
@@ -134,6 +148,7 @@ class OpenScenario2Parser(object):
 
 
     def apply_parameter_overrides(self, model, scenario_parameter_overrides):
+        print(f"scenario_parameter_overrides to apply: {scenario_parameter_overrides}")
         keys = list(scenario_parameter_overrides.keys())
         print("Applying parameter overrides for scenarios:", keys)
         for scenario in model.find_children_of_type(ScenarioDeclaration):
@@ -149,6 +164,7 @@ class OpenScenario2Parser(object):
                         override_value = scenario_parameter_overrides[scenario.name][parameter.name]
                         child_def = parameter.get_value_child()
                         param_type, is_list = parameter.get_type()
+                        print(f"Applying parameter override for parameter: {parameter.name} with value: {override_value}")
                         try:
                             if is_list:
                                 if child_def is None:
