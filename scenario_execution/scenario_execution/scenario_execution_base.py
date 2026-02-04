@@ -26,7 +26,6 @@ from scenario_execution.model.osc2_parser import OpenScenario2Parser
 from scenario_execution.utils.logging import Logger
 from scenario_execution.model.model_file_loader import ModelFileLoader
 from dataclasses import dataclass
-from xml.sax.saxutils import escape  # nosec B406 # escape is only used on an internally generated error string
 from timeit import default_timer as timer
 from typing import List, Optional
 import subprocess  # nosec B404
@@ -369,9 +368,11 @@ class ScenarioExecution(object):
                                 out.write(f'      <property name="start_time" value="{res.start_time.timestamp():.6f}"/>\n')
                                 out.write(f'    </properties>\n')
                             if res.result is False:
-                                failure_text = escape(res.failure_output).replace('"', "'")
+                                # Only escape < and & but not > to preserve tree visualization readability
+                                failure_text = res.failure_output.replace("&", "&amp;").replace(
+                                    "<", "&lt;").replace('"', "'")
                                 out.write(f'    <failure message="{res.failure_message}">{failure_text}</failure>\n')
-                            out.write(f'  </testcase>\n')
+                            out.write("  </testcase>\n")
                         out.write("</testsuite>\n")
                 except Exception as e:  # pylint: disable=broad-except
                     # use print, as logger might not be available during shutdown
