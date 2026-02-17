@@ -47,6 +47,7 @@ setup(
             'actor_exists = scenario_execution_gazebo.actions.gazebo_actor_exists:GazeboActorExists',
             'set_entity_pose = scenario_execution_gazebo.actions.gazebo_set_entity_pose:GazeboSetEntityPose',
             'osc_actor.set_actor_pose = scenario_execution_gazebo.actions.gazebo_set_actor_pose:GazeboSetActorPose',
+            'gz_delete_entity = scenario_execution_gazebo.actions.gazebo_delete_entity:GazeboDeleteEntity',
             'osc_actor.delete = scenario_execution_gazebo.actions.gazebo_delete_actor:GazeboDeleteActor',
             'spawn_multiple = scenario_execution_gazebo.actions.gazebo_spawn_multiple:GazeboSpawnMultiple',
             'wait_for_sim = scenario_execution_gazebo.actions.gazebo_wait_for_sim:GazeboWaitForSim',

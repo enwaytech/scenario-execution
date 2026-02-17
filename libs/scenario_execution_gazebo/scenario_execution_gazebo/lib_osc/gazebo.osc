@@ -6,9 +6,13 @@ action actor_exists:
     entity_name: string                 # name of the actor within simulation
     world_name: string = 'default'      # simulation world name
 
+action gz_delete_entity:
+    # Delete an entity from simulation
+    entity_name: string                 # name of the entity
+    world_name: string = 'default'      # simulation world name
+
 action osc_actor.delete:
     # Delete an actor from simulation
-    entity_name: string                 # name of the actor within simulation
     world_name: string = 'default'      # simulation world name
 
 action osc_actor.relative_spawn:
