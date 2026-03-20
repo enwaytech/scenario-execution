@@ -130,10 +130,10 @@ class GazeboSpawnEntity(RunProcess):
             return
 
         self.logger.info(f"Deleting entity '{self.entity_name}' from simulation.")
-        subprocess.run(["gz", "service", "-s", "/world/" + self.world_name + "/remove",  # pylint: disable=subprocess-run-check
+        subprocess.run(["gz", "service", "-s", f"/world/{self.world_name}/remove",  # pylint: disable=subprocess-run-check
                         "--reqtype", "gz.msgs.Entity",
                         "--reptype", "gz.msgs.Boolean",
-                        "--timeout", "1000", "--req", 'name: "' + self.entity_name + '" type: MODEL'])
+                        "--timeout", "1000", "--req", f'name: "{self.entity_name}" type: MODEL'])
 
     def on_process_finished(self, ret):
         """
@@ -185,10 +185,11 @@ class GazeboSpawnEntity(RunProcess):
         """
         pose = self.get_spawn_pose()
 
-        super().set_command(["gz", "service", "-s", "/world/" + self.world_name + "/create",
+        req = f'pose: {pose} name: "{self.entity_name}" allow_renaming: false sdf: "{command}"'
+        super().set_command(["gz", "service", "-s", f"/world/{self.world_name}/create",
                              "--reqtype", "gz.msgs.EntityFactory",
                              "--reptype", "gz.msgs.Boolean",
-                             "--timeout", "30000", "--req", "pose: " + pose + " name: \"" + self.entity_name + "\" allow_renaming: false sdf: \"" + command + "\""])
+                             "--timeout", "30000", "--req", req])
 
     def topic_callback(self, msg):
         '''

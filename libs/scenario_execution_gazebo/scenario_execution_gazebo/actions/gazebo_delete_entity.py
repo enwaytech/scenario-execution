@@ -15,10 +15,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-import py_trees
 from enum import Enum
 from typing import Optional
 
+import py_trees
 from scenario_execution.actions.run_process import RunProcess
 
 
@@ -44,10 +44,10 @@ class GazeboDeleteEntity(RunProcess):
         self.entity_name = entity_name
         self.world_name = world_name
 
-        self.set_command(["gz", "service", "-s", "/world/" + self.world_name + "/remove",
+        self.set_command(["gz", "service", "-s", f"/world/{self.world_name}/remove",
                           "--reqtype", "gz.msgs.Entity",
                           "--reptype", "gz.msgs.Boolean",
-                          "--timeout", "1000", "--req", 'name: "' + self.entity_name + '" type: MODEL'])
+                          "--timeout", "1000", "--req", f'name: "{self.entity_name}" type: MODEL'])
 
     def on_executed(self) -> None:
         """Hook when process gets executed."""

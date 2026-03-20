@@ -22,9 +22,10 @@ class GazeboDeleteActor(GazeboDeleteEntity):
     """Class to delete an actor in gazebo."""
 
     def __init__(self, associated_actor: dict) -> None:
-        self.associated_actor = associated_actor
         super().__init__()
+        self.associated_actor = associated_actor
 
     # pylint: disable-next=arguments-differ
     def execute(self, associated_actor: dict, world_name: str) -> None:
+        self.associated_actor = associated_actor
         super().execute(entity_name=self.associated_actor["name"], world_name=world_name)

@@ -21,12 +21,13 @@ class GazeboSpawnActor(GazeboSpawnEntity):
     """Class to spawn an actor into simulation."""
 
     def __init__(self, associated_actor: dict, xacro_arguments: list, model: str):
-        self.associated_actor = associated_actor
         super().__init__(xacro_arguments, model)
+        self.associated_actor = associated_actor
 
     def setup(self, **kwargs):
         super().setup(**kwargs)
 
     # pylint: disable-next=arguments-differ
     def execute(self, associated_actor: dict, spawn_pose: list, world_name: str) -> None:
+        self.associated_actor = associated_actor
         super().execute(entity_name=self.associated_actor["name"], spawn_pose=spawn_pose, world_name=world_name)
