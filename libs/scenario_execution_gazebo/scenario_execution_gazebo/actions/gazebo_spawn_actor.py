@@ -95,6 +95,8 @@ class GazeboSpawnActor(RunProcess):
     def execute(self, associated_actor, spawn_pose: list, world_name: str):  # pylint: disable=arguments-differ
         self.spawn_pose = spawn_pose
         self.world_name = world_name
+        self.current_state = SpawnActionState.MODEL_AVAILABLE
+        self.executed = False
 
     def update(self) -> py_trees.common.Status:
         """
