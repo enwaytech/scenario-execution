@@ -6,9 +6,13 @@ action actor_exists:
     entity_name: string                 # name of the actor within simulation
     world_name: string = 'default'      # simulation world name
 
+action gz_delete_entity:
+    # Delete an entity from simulation
+    entity_name: string                 # name of the entity
+    world_name: string = 'default'      # simulation world name
+
 action osc_actor.delete:
     # Delete an actor from simulation
-    entity_name: string                 # name of the actor within simulation
     world_name: string = 'default'      # simulation world name
 
 action osc_actor.relative_spawn:
@@ -20,8 +24,16 @@ action osc_actor.relative_spawn:
     world_name: string = 'default'      # simulation world name
     xacro_arguments: string = ''        # comma-separated list of argument key:=value pairs
 
-action osc_actor.spawn:
+action gz_spawn_entity:
     # Spawn a simulation entity.
+    entity_name: string                 # name of the entity
+    spawn_pose: pose_3d                 # position at which the object gets spawned
+    model: string                       # model definition
+    world_name: string = 'default'      # simulation world name
+    xacro_arguments: string = ''        # comma-separated list of argument key:=value pairs
+
+action osc_actor.spawn:
+    # Spawn an actor as a simulation entity.
     spawn_pose: pose_3d                 # position at which the object gets spawned
     model: string                       # model definition
     world_name: string = 'default'      # simulation world name
@@ -38,7 +50,7 @@ action osc_actor.set_actor_pose:
     pose: pose_3d                       # desired pose
     world_name: string = 'default'      # simulation world name
 
-struct spawn_entity:
+struct spawn_entity_struct:
     entity_name: string                 # name of entity in simulation
     spawn_pose: pose_3d                 # position at which the object gets spawned
     model: string                       # model definition
@@ -46,7 +58,7 @@ struct spawn_entity:
 
 action spawn_multiple:
     # Spawn multiple simulation entities.
-    entities: list of spawn_entity      # entities to spawn
+    entities: list of spawn_entity_struct      # entities to spawn
     world_name: string = 'default'      # simulation world name
 
 action wait_for_sim:
