@@ -15,6 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+import subprocess  # nosec B404
 from enum import Enum
 from typing import Optional
 
@@ -38,16 +39,39 @@ class GazeboDeleteEntity(RunProcess):
         super().__init__()
         self.entity_name: Optional[str] = None
         self.current_state = DeleteActionState.IDLE
+        self._entity_exists = True
 
     def execute(self, entity_name: str, world_name: str):  # pylint: disable=arguments-differ
         super().execute(wait_for_shutdown=True)
         self.entity_name = entity_name
         self.world_name = world_name
+        self._entity_exists = self._check_entity_exists(entity_name)
 
-        self.set_command(["gz", "service", "-s", f"/world/{self.world_name}/remove",
-                          "--reqtype", "gz.msgs.Entity",
-                          "--reptype", "gz.msgs.Boolean",
-                          "--timeout", "1000", "--req", f'name: "{self.entity_name}" type: MODEL'])
+        if self._entity_exists:
+            self.set_command(["gz", "service", "-s", f"/world/{self.world_name}/remove",
+                              "--reqtype", "gz.msgs.Entity",
+                              "--reptype", "gz.msgs.Boolean",
+                              "--timeout", "1000", "--req", f'name: "{self.entity_name}" type: MODEL'])
+
+    def _check_entity_exists(self, entity_name: str) -> bool:
+        """Return True if the entity is present in the Gazebo world."""
+        try:
+            result = subprocess.run(  # nosec B603
+                ["gz", "model", "-m", entity_name],
+                capture_output=True,
+                timeout=10,
+            )
+            return "no model named" not in result.stdout.decode().lower()
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return True  # assume exists so deletion is still attempted
+
+    def update(self) -> py_trees.common.Status:
+        if not self._entity_exists:
+            self.feedback_message = (  # pylint: disable= attribute-defined-outside-init
+                f"Entity '{self.entity_name}' does not exist, skipping deletion"
+            )
+            return py_trees.common.Status.SUCCESS
+        return super().update()
 
     def on_executed(self) -> None:
         """Hook when process gets executed."""
