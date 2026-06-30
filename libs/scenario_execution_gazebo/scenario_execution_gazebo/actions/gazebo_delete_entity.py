@@ -89,8 +89,9 @@ class GazeboDeleteEntity(RunProcess):
                         line = self.output.popleft()
                         line = line.lower()
                         if "error" in line or "timed out" in line:
+                            self.logger.warning(line)
                             # pylint: disable-next= attribute-defined-outside-init
-                            self.feedback_message = f"Found error output while executing '{self.get_command()}'"
+                            self.feedback_message = f"Found error output while executing '{self.get_command()}': {line}"
                             self.current_state = DeleteActionState.FAILURE
                             return py_trees.common.Status.FAILURE
                     except IndexError:
