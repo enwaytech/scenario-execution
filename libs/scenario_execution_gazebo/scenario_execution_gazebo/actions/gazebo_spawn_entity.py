@@ -149,8 +149,9 @@ class GazeboSpawnEntity(RunProcess):
                         line = self.output.popleft()
                         line = line.lower()
                         if 'error' in line or 'timed out' in line:
-                            self.logger.warn(line)
-                            self.feedback_message = f"Found error output while executing '{self.command}'"  # pylint: disable= attribute-defined-outside-init
+                            self.logger.warning(line)
+                            # pylint: disable-next= attribute-defined-outside-init
+                            self.feedback_message = f"Found error output while executing '{self.get_command()}': {line}"
                             self.current_state = SpawnActionState.FAILURE
                             return py_trees.common.Status.FAILURE
                     except IndexError:
