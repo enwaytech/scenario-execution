@@ -115,8 +115,8 @@ class RosBagRecord(RunProcess):
             while True:
                 try:
                     line = self.output.popleft()
-                    if line.endswith('All requested topics are subscribed. Stopping discovery...'):
-                        self.feedback_message = f"Recording..."  # pylint: disable= attribute-defined-outside-init
+                    if 'All requested topics are subscribed. Stopping discovery...' in line or not self.missing_topics:
+                        self.feedback_message = "Recording..."  # pylint: disable= attribute-defined-outside-init
                         self.current_state = RosBagRecordActionState.RECORDING
                         return py_trees.common.Status.SUCCESS
                     elif self.missing_topics and 'Subscribed to topic ' in line:
