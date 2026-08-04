@@ -14,18 +14,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import subprocess  # nosec B404
 from enum import Enum
+import subprocess  # nosec B404
 from typing import Optional
 
-from transforms3d.taitbryan import euler2quat
-from std_msgs.msg import String
-
-from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy, QoSReliabilityPolicy
-from rclpy.node import Node
 import py_trees
+from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from scenario_execution.actions.base_action import ActionError
 from scenario_execution.actions.run_process import RunProcess
+from std_msgs.msg import String
+from transforms3d.euler import euler2quat
+
 from .utils import SpawnUtils
 
 
@@ -165,12 +165,11 @@ class GazeboSpawnEntity(RunProcess):
             return py_trees.common.Status.INVALID
 
     def get_spawn_pose(self):
-        # euler2quat() requires "zyx" convention,
-        # while in YAML, we define as pitch-roll-yaw (xyz), since it's more intuitive.
+        # transforms3d default 'sxyz' axes == ROS roll-pitch-yaw (Rz(yaw)*Ry(pitch)*Rx(roll))
         try:
-            quaternion = euler2quat(self.spawn_pose["orientation"]["yaw"],
-                                    self.spawn_pose["orientation"]["roll"],
-                                    self.spawn_pose["orientation"]["pitch"])
+            quaternion = euler2quat(self.spawn_pose["orientation"]["roll"],
+                                    self.spawn_pose["orientation"]["pitch"],
+                                    self.spawn_pose["orientation"]["yaw"])
             pose = '{ position: {' \
                 f' x: {self.spawn_pose["position"]["x"]} y: {self.spawn_pose["position"]["y"]} z: {self.spawn_pose["position"]["z"]}' \
                 ' } orientation: {' \
