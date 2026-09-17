@@ -66,8 +66,8 @@ class GazeboSetEntityPose(RunProcess):
     def parse_pose(self, pose: dict) -> str:
         try:
             quaternion = euler2quat(
-                pose["orientation"]["pitch"],
                 pose["orientation"]["roll"],
+                pose["orientation"]["pitch"],
                 pose["orientation"]["yaw"],
             )
             pose_str = (
