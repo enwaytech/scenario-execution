@@ -66,6 +66,7 @@ setup(
             'ros_run = scenario_execution_ros.actions.ros_run:RosRun',
             'service_call = scenario_execution_ros.actions.ros_service_call:RosServiceCall',
             'set_node_parameter = scenario_execution_ros.actions.ros_set_node_parameter:RosSetNodeParameter',
+            'set_node_parameter_with_restore = scenario_execution_ros.actions.ros_set_node_parameter_with_restore:RosSetNodeParameterWithRestore',
             'topic_monitor = scenario_execution_ros.actions.ros_topic_monitor:RosTopicMonitor',
             'topic_publish = scenario_execution_ros.actions.ros_topic_publish:RosTopicPublish',
             'wait_for_data = scenario_execution_ros.actions.ros_topic_wait_for_data:RosTopicWaitForData',
