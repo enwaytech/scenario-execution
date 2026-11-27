@@ -57,7 +57,7 @@ action assert_lifecycle_state:
 action assert_tf_moving:
     # Checks that a tf frame_id keeps moving in respect to a parent_frame_id. If there is no movement within timeout the action ends with failure.
     # Speeds below threshold_translation and threshold_rotation are discarded. By default the action waits for the first transform to get available
-    # before starting the timeout timer. This can be changed by setting wait_for_first_transform to false. If the tf topics are not available 
+    # before starting the timeout timer. This can be changed by setting wait_for_first_transform to false. If the tf topics are not available
     # on /tf and /tf_static you can specify a namespace by setting tf_topic_namespace.
     frame_id: string                     # frame_id to check for movement
     parent_frame_id: string = "map"      # parent frame_id against which the movement is checked
@@ -126,7 +126,7 @@ action differential_drive_robot.tf_close_to:
     # Wait until a TF frame is close to a defined reference point
     threshold: length                    # distance at which the action succeeds
     reference_point: position_3d         # z is not considered
-    robot_frame_id: string = 'base_link' # defines the TF frame id of the robot 
+    robot_frame_id: string = 'base_link' # defines the TF frame id of the robot
     sim: bool = false                    # in simulation, we need to look up the transform map --> base_link at a different time as the scenario execution node is not allowed to use the sim time
     namespace_override: string = ''      # if set, it's used as namespace (instead of the associated actor's name)
 
@@ -138,7 +138,7 @@ action log_check:
 action ros_launch:
     # Execute a ros launch file
     package_name: string                 # package that contains the launch file, or empty if the launch file is specified as a path
-    launch_file: string                  # launch file name, if the package_name is empty the launch_file is used as a path (either an absolute path or relative to the scenario file) 
+    launch_file: string                  # launch file name, if the package_name is empty the launch_file is used as a path (either an absolute path or relative to the scenario file)
     arguments: list of key_value         # ros arguments (get forwarded as key:=value pairs)
     wait_for_shutdown: bool = true       # if true, the action waits until the execution has finished
     shutdown_timeout: time = 10s         # (only used if wait_for_shutdown is false) time to wait between SIGINT and SIGKILL getting sent, if process is still running on scenario shutdown
@@ -161,6 +161,13 @@ action service_call:
 
 action set_node_parameter:
     # Set a parameter of a node.
+    node_name: string                    # name of the node
+    parameter_name: string               # name of the parameter
+    parameter_value: string              # new value of the parameter
+
+action set_node_parameter_with_restore:
+    # Set a parameter of a node and restore its original value on scenario shutdown (success, failure, timeout or
+    # Ctrl-C). Unlike set_node_parameter, the value is parsed as by `ros2 param set`, so numeric arrays are supported.
     node_name: string                    # name of the node
     parameter_name: string               # name of the parameter
     parameter_value: string              # new value of the parameter
@@ -202,12 +209,12 @@ action wait_for_services:
 action wait_for_topic_publisher:
     # Wait for a specific node to create a publisher for a topic
     topic: string                        # topic, the node will publish on
-    node_name: string                    # node name 
+    node_name: string                    # node name
 
 action wait_for_topic_subscription:
     # Wait for a node to subscribe to a topic
     topic: string                        # topic, the node is subscribed to
-    node_name: string                    # node name 
+    node_name: string                    # node name
 
 action wait_for_topics:
     # Wait for topics to get available (i.e. publisher gets available).

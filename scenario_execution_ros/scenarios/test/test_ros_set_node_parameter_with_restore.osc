@@ -1,0 +1,10 @@
+import osc.helpers
+import osc.ros
+
+scenario test_ros_set_node_parameter_with_restore:
+    array_value: string = '[1.0,2.0]'
+    timeout(10s)
+    do serial:
+        set_node_parameter_with_restore(node_name: '/test_node',
+                                        parameter_name: 'testArrayParam',
+                                        parameter_value: array_value)
